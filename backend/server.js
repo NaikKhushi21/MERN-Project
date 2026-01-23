@@ -32,7 +32,7 @@ app.use(express.urlencoded({ extended: true }));
 // Serve uploaded images
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Routes
+// API Routes (must be before static file serving)
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/products/upload", uploadRoutes);
@@ -41,11 +41,15 @@ app.use("/api/reviews", reviewRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/orders", orderRoutes);
 
+// Serve static files from React app in production
 if (process.env.NODE_ENV === "production") {
-    app.use(express.static(path.join(__dirname, "/frontend/dist")));
+    // Serve static files from the React app
+    app.use(express.static(path.join(__dirname, "../frontend/dist")));
 
+    // The "catchall" handler: for any request that doesn't
+    // match one above, send back React's index.html file.
     app.get("*", (req, res) => {
-        res.sendFile(path.resolve(__dirname, "frontend", "dist", "index.html"));
+        res.sendFile(path.resolve(__dirname, "../frontend/dist/index.html"));
     });
 }
 

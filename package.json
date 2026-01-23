@@ -4,8 +4,10 @@
   "main": "index.js",
   "scripts": {
     "dev": "NODE_ENV=development nodemon backend/server.js",
-    "build": "npm install && npm install --prefix frontend && npm run build --prefix frontend",
-    "start": "NODE_ENV=production node backend/server.js"
+    "build": "npm install && cd frontend && npm install && npm run build && cd ..",
+    "start": "NODE_ENV=production node backend/server.js",
+    "install-client": "cd frontend && npm install",
+    "build-client": "cd frontend && npm run build"
   },
   "type": "module",
   "keywords": [],
