@@ -1,149 +1,82 @@
-import { EditIcon, DeleteIcon } from "@chakra-ui/icons";
-import { Box,
-	Button,
-	Heading,
-	HStack,
-	IconButton,
-	Image,
-	Input,
-	Modal,
-	ModalBody,
-	ModalCloseButton,
-	ModalContent,
-	ModalFooter,
-	ModalHeader,
-	ModalOverlay,
-	Text,
-	useColorModeValue,
-	useDisclosure,
-	useToast,
-	VStack, 
+import { StarIcon } from "@chakra-ui/icons";
+import {
+    Box,
+    Heading,
+    HStack,
+    Image,
+    Text,
+    useColorModeValue,
+    Badge,
+    Link,
 } from "@chakra-ui/react";
-import { useProductStore } from "../store/product";
-import { useState } from "react";
+import { Link as RouterLink } from "react-router-dom";
+import { useAuthStore } from "../store/auth";
 
 const ProductCard = ({ product }) => {
-	const [updatedProduct, setUpdatedProduct] = useState(product);
     const textcolor = useColorModeValue("gray.600", "gray.200");
     const bg = useColorModeValue("white", "gray.800");
-
-    const{deleteProduct, updateProduct} =useProductStore();
-    const toast = useToast();
-    const {isOpen, onOpen , onClose} = useDisclosure();
-
-    const handleDeleteProduct = async (pid) => {
-		const { success, message } = await deleteProduct(pid);
-		if (!success) {
-			toast({
-				title: "Error",
-				description: message,
-				status: "error",
-				duration: 3000,
-				isClosable: true,
-			});
-		} else {
-			toast({
-				title: "Success",
-				description: message,
-				status: "success",
-				duration: 3000,
-				isClosable: true,
-			});
-		}
-	};
-
-    const handleUpdateProduct = async (pid, updatedProduct) => {
-        const {success, message} = await updateProduct(pid, updatedProduct);
-        onClose();
-        if(!success) {
-            toast({
-                title: "Error",
-                description: message,
-                status: "error",
-                duration: 3000,
-                isClosable: true,
-            });
-        }
-        else {
-            toast({
-                title: "Success",
-                description: "Product updated successfully!",
-                status: "success",
-                duration: 3000,
-                isClosable: true,
-            });
-        }
-    };
+    const { user } = useAuthStore();
+    const isOwner = user && product.user?._id === user._id;
 
     return (
-        <Box
-            shadow='lg'
-            rounded='lg'
-            overflow='hidden'
-            transition='all 0.3s'
-            _hover={{ transform: "translateY(-5px)", shadow: "xl" }}
-            bg={bg}
-        >
-            <Image src={product.image} alt={product.name} h={48} w='full' objectFit='cover' />
+        <Link as={RouterLink} to={`/products/${product._id}`} _hover={{ textDecoration: "none" }}>
+            <Box
+                shadow="lg"
+                rounded="lg"
+                overflow="hidden"
+                transition="all 0.3s"
+                _hover={{ transform: "translateY(-5px)", shadow: "xl" }}
+                bg={bg}
+                cursor="pointer"
+            >
+                <Image src={product.image} alt={product.name} h={48} w="full" objectFit="cover" />
 
-            <Box p={4}>
-                <Heading as='h3' size='md' mb={2}>
-                    {product.name}
-                </Heading>
-                <Text fontWeight='bold' fontSize='xl' color={textcolor} mb={4}>
-                    ${product.price}
-                </Text>
+                <Box p={4}>
+                    <HStack justify="space-between" mb={2}>
+                        <Heading as="h3" size="md" noOfLines={1}>
+                            {product.name}
+                        </Heading>
+                        {isOwner && (
+                            <Badge colorScheme="purple" fontSize="xs">
+                                Your Product
+                            </Badge>
+                        )}
+                    </HStack>
 
-                <HStack spacing={2}>
-                    <IconButton icon={<EditIcon />} 
-                        onClick = {onOpen}
-                    colorScheme="purple" />
-                    <IconButton icon={<DeleteIcon />} onClick={() => handleDeleteProduct(product._id)} colorScheme="red" />
-                </HStack> 
-            </Box>
+                    <HStack mb={2}>
+                        <Text fontWeight="bold" fontSize="xl" color="purple.600">
+                            ${product.price}
+                        </Text>
+                        {product.averageRating > 0 && (
+                            <HStack spacing={1}>
+                                <StarIcon color="yellow.400" boxSize={3} />
+                                <Text fontSize="sm" color={textcolor}>
+                                    {product.averageRating.toFixed(1)}
+                                </Text>
+                                <Text fontSize="xs" color="gray.500">
+                                    ({product.numReviews})
+                                </Text>
+                            </HStack>
+                        )}
+                    </HStack>
 
-            <Modal isOpen={isOpen} onClose={onClose}>
-                <ModalOverlay />
+                    {product.category && (
+                        <Badge colorScheme="blue" mb={2}>
+                            {product.category.name}
+                        </Badge>
+                    )}
 
-                <ModalContent>
-                    <ModalHeader>Update Product</ModalHeader>
-                    <ModalCloseButton />
-                    <ModalBody>
-                        <VStack spacing={4}>
-                        <Input
-								placeholder='Product Name'
-								name='name'
-								value={updatedProduct.name}
-								onChange={(e) => setUpdatedProduct({ ...updatedProduct, name: e.target.value })}
-							/>
-							<Input
-								placeholder='Price'
-								name='price'
-								type='number'
-								value={updatedProduct.price}
-								onChange={(e) => setUpdatedProduct({ ...updatedProduct, price: e.target.value })}
-							/>
-							<Input
-								placeholder='Image URL'
-								name='image'
-								value={updatedProduct.image}
-								onChange={(e) => setUpdatedProduct({ ...updatedProduct, image: e.target.value })}
-							/>
-                        </VStack>
-                    </ModalBody>
-
-                    <ModalFooter>
-                        <Button colorScheme='purple' mr={3}
-                            onClick={() => 
-                                handleUpdateProduct(product._id, updatedProduct)}
+                    <HStack>
+                        <Badge
+                            colorScheme={product.stock > 0 ? "green" : "red"}
+                            fontSize="xs"
                         >
-                        Update</Button>
-                        <Button variant='ghost' onClick={onClose}>Cancel</Button>
-                    </ModalFooter>
-                </ModalContent>
-
-            </Modal>
-        </Box>
+                            {product.stock > 0 ? `In Stock` : "Out of Stock"}
+                        </Badge>
+                    </HStack>
+                </Box>
+            </Box>
+        </Link>
     );
 };
 
