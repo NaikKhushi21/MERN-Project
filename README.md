@@ -2,6 +2,10 @@
 
 A full-stack e-commerce application built with MongoDB, Express, React, and Node.js. This project demonstrates modern web development practices with authentication, product management, shopping cart, reviews, and more.
 
+## Website Link
+
+Visit the live project at [https://mern-project-wxdb.onrender.com/](https://mern-project-wxdb.onrender.com/)
+
 ## Demo
 
 🎥 [Watch Demo Video](https://drive.google.com/file/d/1Fd1EEid0MB9mf09lsmSoheNaIrCYLceT/view?usp=sharing)
